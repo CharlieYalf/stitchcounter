@@ -236,6 +236,10 @@
             <label for="target-input">Stitches per Row:</label>
             <input type="number" id="target-input" min="1" step="1" placeholder="Enter stitches per row">
             <button id="set-target">Set Target</button>
+            <div style="margin-top: 15px;">
+                <label for="increment-amount">Increment Amount:</label>
+                <input type="number" id="increment-amount" min="1" step="1" value="1" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 10px;">
+            </div>
             <div id="auto-reset">
                 <input type="checkbox" id="auto-reset-toggle" checked>
                 <label for="auto-reset-toggle">Automatically start next row when target reached</label>
@@ -277,18 +281,21 @@
         let target = localStorage.getItem('target') ? parseInt(localStorage.getItem('target')) : null;
         let currentRow = localStorage.getItem('currentRow') ? parseInt(localStorage.getItem('currentRow')) : 1;
         let autoReset = localStorage.getItem('autoReset') !== null ? JSON.parse(localStorage.getItem('autoReset')) : true;
+        let incrementAmount = localStorage.getItem('incrementAmount') ? parseInt(localStorage.getItem('incrementAmount')) : 1;
 
         const countDisplay = document.getElementById('count-display');
         const rowDisplay = document.getElementById('row-display');
         const message = document.getElementById('message');
         const targetInput = document.getElementById('target-input');
         const autoResetToggle = document.getElementById('auto-reset-toggle');
+        const incrementAmountInput = document.getElementById('increment-amount');
 
         // Initialize UI elements
         if (target !== null) {
             targetInput.value = target;
         }
         autoResetToggle.checked = autoReset;
+        incrementAmountInput.value = incrementAmount;
         
         function updateDisplay() {
             countDisplay.textContent = count;
@@ -316,17 +323,19 @@
         updateDisplay();
 
         document.getElementById('increment').addEventListener('click', () => {
-            count++;
+            count += incrementAmount;
             localStorage.setItem('count', count);
             updateDisplay();
         });
 
         document.getElementById('decrement').addEventListener('click', () => {
-            if (count > 0) {
-                count--;
-                localStorage.setItem('count', count);
-                updateDisplay();
+            if (count >= incrementAmount) {
+                count -= incrementAmount;
+            } else {
+                count = 0;
             }
+            localStorage.setItem('count', count);
+            updateDisplay();
         });
 
         document.getElementById('reset').addEventListener('click', () => {
@@ -390,6 +399,17 @@
                 document.getElementById('reset').click();
             } else if (e.code === 'KeyP') {
                 document.getElementById('reset-project').click();
+            }
+        });
+
+        // Add increment amount change handler
+        incrementAmountInput.addEventListener('change', () => {
+            const newAmount = parseInt(incrementAmountInput.value);
+            if (newAmount >= 1) {
+                incrementAmount = newAmount;
+                localStorage.setItem('incrementAmount', incrementAmount);
+            } else {
+                incrementAmountInput.value = incrementAmount;
             }
         });
     </script>
