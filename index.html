@@ -276,17 +276,38 @@
         
         async function updateVisitorCount() {
             try {
-                // Increment the counter
-                const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
-                const data = await response.json();
+                // First try to get the current count
+                const getResponse = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
+                let data;
+                
+                // If the counter doesn't exist yet, create it
+                if (!getResponse.ok && getResponse.status === 404) {
+                    const createResponse = await fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=0`);
+                    if (!createResponse.ok) throw new Error('Failed to create counter');
+                    
+                    // Now increment it for the first time
+                    const hitResponse = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                    if (!hitResponse.ok) throw new Error('Failed to increment counter');
+                    data = await hitResponse.json();
+                } else {
+                    // Counter exists, just increment it
+                    const hitResponse = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                    if (!hitResponse.ok) throw new Error('Failed to increment counter');
+                    data = await hitResponse.json();
+                }
                 
                 // Update the display
                 const visitorCountElement = document.getElementById('visitor-count');
-                visitorCountElement.textContent = `${data.value.toLocaleString()} visits`;
+                if (data && typeof data.value === 'number') {
+                    visitorCountElement.textContent = `${data.value.toLocaleString()} visits`;
+                } else {
+                    throw new Error('Invalid response data');
+                }
             } catch (err) {
                 console.log('Error updating visitor count:', err);
                 const visitorCountElement = document.getElementById('visitor-count');
-                visitorCountElement.style.display = 'none';
+                visitorCountElement.textContent = 'Visit counter unavailable';
+                // Don't hide it completely, just show the error state
             }
         }
 
