@@ -271,13 +271,21 @@
     
     <script>
         // Visitor Counter
-        function cb(response) {
-            document.getElementById('visitor-count').textContent = `${response.value.toLocaleString()} visits`;
-        }
-    </script>
-    <script async src="https://api.countapi.xyz/hit/charlieyalf-stitchcounter/visits?callback=cb"></script>
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://api.countapi.xyz/hit/charlieyalf-stitchcounter/visits");
+        xhr.responseType = "json";
+        xhr.onload = function() {
+            if (this.response && this.response.value) {
+                document.getElementById('visitor-count').textContent = `${this.response.value.toLocaleString()} visits`;
+            } else {
+                document.getElementById('visitor-count').textContent = 'Visit counter unavailable';
+            }
+        };
+        xhr.onerror = function() {
+            document.getElementById('visitor-count').textContent = 'Visit counter unavailable';
+        };
+        xhr.send();
 
-    <script>
         // Wake Lock API functionality
         let wakeLock = null;
 
