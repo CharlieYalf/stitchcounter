@@ -271,49 +271,13 @@
     
     <script>
         // Visitor Counter
-        const namespace = 'stitchcounter'; // Unique namespace for this app
-        const key = 'visits';
-        
-        async function updateVisitorCount() {
-            try {
-                // First try to get the current count
-                const getResponse = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
-                let data;
-                
-                // If the counter doesn't exist yet, create it
-                if (!getResponse.ok && getResponse.status === 404) {
-                    const createResponse = await fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=0`);
-                    if (!createResponse.ok) throw new Error('Failed to create counter');
-                    
-                    // Now increment it for the first time
-                    const hitResponse = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
-                    if (!hitResponse.ok) throw new Error('Failed to increment counter');
-                    data = await hitResponse.json();
-                } else {
-                    // Counter exists, just increment it
-                    const hitResponse = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
-                    if (!hitResponse.ok) throw new Error('Failed to increment counter');
-                    data = await hitResponse.json();
-                }
-                
-                // Update the display
-                const visitorCountElement = document.getElementById('visitor-count');
-                if (data && typeof data.value === 'number') {
-                    visitorCountElement.textContent = `${data.value.toLocaleString()} visits`;
-                } else {
-                    throw new Error('Invalid response data');
-                }
-            } catch (err) {
-                console.log('Error updating visitor count:', err);
-                const visitorCountElement = document.getElementById('visitor-count');
-                visitorCountElement.textContent = 'Visit counter unavailable';
-                // Don't hide it completely, just show the error state
-            }
+        function cb(response) {
+            document.getElementById('visitor-count').textContent = `${response.value.toLocaleString()} visits`;
         }
+    </script>
+    <script async src="https://api.countapi.xyz/hit/charlieyalf-stitchcounter/visits?callback=cb"></script>
 
-        // Call the update function when the page loads
-        updateVisitorCount();
-
+    <script>
         // Wake Lock API functionality
         let wakeLock = null;
 
