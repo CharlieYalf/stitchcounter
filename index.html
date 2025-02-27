@@ -241,6 +241,30 @@
     </div>
     
     <script>
+        // Wake Lock API functionality
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock is active');
+                
+                // Add event listener to reacquire wake lock if page becomes visible again
+                document.addEventListener('visibilitychange', async () => {
+                    if (wakeLock !== null && document.visibilityState === 'visible') {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                    }
+                });
+            } catch (err) {
+                console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+            }
+        }
+
+        // Request wake lock when page loads
+        if ('wakeLock' in navigator) {
+            requestWakeLock();
+        }
+
         // Load saved values from local storage
         let count = localStorage.getItem('count') ? parseInt(localStorage.getItem('count')) : 0;
         let target = localStorage.getItem('target') ? parseInt(localStorage.getItem('target')) : null;
