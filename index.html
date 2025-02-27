@@ -215,6 +215,14 @@
                 padding: 10px 15px;
             }
         }
+
+        #visitor-count {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.6;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -257,9 +265,34 @@
         <button id="reset-project">Reset Project</button>
         
         <div id="message" style="display: none;">Row Complete! Starting next row... 🧶</div>
+        
+        <div id="visitor-count">Loading visitor count...</div>
     </div>
     
     <script>
+        // Visitor Counter
+        const namespace = 'stitchcounter'; // Unique namespace for this app
+        const key = 'visits';
+        
+        async function updateVisitorCount() {
+            try {
+                // Increment the counter
+                const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                const data = await response.json();
+                
+                // Update the display
+                const visitorCountElement = document.getElementById('visitor-count');
+                visitorCountElement.textContent = `${data.value.toLocaleString()} visits`;
+            } catch (err) {
+                console.log('Error updating visitor count:', err);
+                const visitorCountElement = document.getElementById('visitor-count');
+                visitorCountElement.style.display = 'none';
+            }
+        }
+
+        // Call the update function when the page loads
+        updateVisitorCount();
+
         // Wake Lock API functionality
         let wakeLock = null;
 
