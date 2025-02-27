@@ -271,20 +271,32 @@
     
     <script>
         // Visitor Counter
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "https://api.countapi.xyz/hit/charlieyalf-stitchcounter/visits");
-        xhr.responseType = "json";
-        xhr.onload = function() {
-            if (this.response && this.response.value) {
-                document.getElementById('visitor-count').textContent = `${this.response.value.toLocaleString()} visits`;
-            } else {
+        async function initializeCounter() {
+            try {
+                // First try to create the counter (this will fail if it already exists)
+                const createResponse = await fetch('https://api.countapi.xyz/create?namespace=charlieyalf-stitchcounter&key=visits&value=0');
+                console.log('Create response:', await createResponse.json());
+            } catch (err) {
+                console.log('Counter might already exist:', err);
+            }
+
+            // Now try to hit the counter
+            try {
+                const response = await fetch('https://api.countapi.xyz/hit/charlieyalf-stitchcounter/visits');
+                const data = await response.json();
+                if (data && data.value) {
+                    document.getElementById('visitor-count').textContent = `${data.value.toLocaleString()} visits`;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (err) {
+                console.log('Error hitting counter:', err);
                 document.getElementById('visitor-count').textContent = 'Visit counter unavailable';
             }
-        };
-        xhr.onerror = function() {
-            document.getElementById('visitor-count').textContent = 'Visit counter unavailable';
-        };
-        xhr.send();
+        }
+
+        // Initialize the counter
+        initializeCounter();
 
         // Wake Lock API functionality
         let wakeLock = null;
